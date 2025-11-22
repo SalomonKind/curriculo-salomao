@@ -146,3 +146,121 @@ document.addEventListener('DOMContentLoaded', () => {
     animatedElements.forEach(el => observer.observe(el));
 
     // ... (código restante do typing effect, etc) ...
+
+    /* === ANIMAÇÃO INTERESTELAR (SPACE WARP) === */
+const canvas = document.getElementById('space-canvas');
+const c = canvas.getContext('2d');
+
+let width, height;
+let stars = [];
+
+// Configurações da Animação
+const numStars = 800; // Quantidade de estrelas
+const starSpeed = 0.5; // Velocidade base (quanto menor, mais lento)
+const mouseSensitivity = 0.05; // Quanto o mouse afeta a direção
+
+// Inicializa o tamanho do canvas
+function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+}
+
+window.addEventListener('resize', resize);
+resize();
+
+// Objeto Estrela
+class Star {
+    constructor() {
+        this.reset(true); // true = inicialização aleatória na tela
+    }
+
+    reset(initial = false) {
+        // Posição X e Y aleatórias
+        this.x = (Math.random() - 0.5) * width * 2;
+        this.y = (Math.random() - 0.5) * height * 2;
+        
+        // Z representa a profundidade (longe ou perto)
+        // Se for inicial, espalha por todo o túnel. Se não, joga lá no fundo.
+        this.z = initial ? Math.random() * width : width; 
+        
+        this.pz = this.z; // Posição Z anterior (para fazer o rastro/traço)
+    }
+
+    update(mouseX, mouseY) {
+        // Move a estrela em direção à tela (diminui Z)
+        this.z -= (10 * starSpeed);
+
+        // Efeito de paralaxe com o mouse
+        this.x -= (mouseX - width / 2) * mouseSensitivity;
+        this.y -= (mouseY - height / 2) * mouseSensitivity;
+
+        // Se a estrela passou da tela (ficou atrás do observador), reseta
+        if (this.z <= 1) {
+            this.reset();
+            this.z = width;
+            this.pz = this.z;
+        }
+    }
+
+    draw() {
+        // Matemática de projeção 3D para 2D
+        let x = (this.x / this.z) * width + width / 2;
+        let y = (this.y / this.z) * height + height / 2;
+
+        // Calcula o tamanho baseado na proximidade (quanto mais perto, maior)
+        let radius = (1 - this.z / width) * 3; // Tamanho máximo 3px
+
+        // Calcula a posição anterior para fazer o efeito de "rastro" (warp)
+        let px = (this.x / this.pz) * width + width / 2;
+        let py = (this.y / this.pz) * height + height / 2;
+
+        this.pz = this.z;
+
+        // Desenha a estrela e o rastro
+        c.beginPath();
+        c.moveTo(px, py);
+        c.lineTo(x, y);
+        
+        // Cor da estrela: Branca com leve brilho azulado
+        // Opacidade aumenta conforme chega perto
+        let opacity = (1 - this.z / width);
+        c.strokeStyle = `rgba(200, 240, 255, ${opacity})`;
+        c.lineWidth = radius;
+        c.lineCap = 'round';
+        c.stroke();
+    }
+}
+
+// Cria as estrelas
+for (let i = 0; i < numStars; i++) {
+    stars.push(new Star());
+}
+
+// Rastreamento do Mouse
+let mouseX = width / 2;
+let mouseY = height / 2;
+
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+// Loop de Animação
+function animateSpace() {
+    // Limpa o canvas com um rastro suave (preto quase transparente)
+    // Isso cria um efeito de motion blur natural
+    c.fillStyle = 'rgba(5, 5, 10, 0.4)'; 
+    c.fillRect(0, 0, width, height);
+
+    stars.forEach(star => {
+        star.update(mouseX, mouseY);
+        star.draw();
+    });
+
+    requestAnimationFrame(animateSpace);
+}
+
+// Inicia
+animateSpace();

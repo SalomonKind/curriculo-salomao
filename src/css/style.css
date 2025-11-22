@@ -6,11 +6,29 @@
     --accent-color: #f83892; /* Azul Sky (Tech/Dados) */
     --accent-glow: rgba(0, 157, 224, 0.3);
     --glass-bg: rgba(30, 41, 59, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(199, 160, 160, 0.1);
     --font-main: 'Inter', sans-serif;
     --font-display: 'Space Grotesk', sans-serif;
     --nav-height: 80px;
 }
+
+/* === CONFIGURAÇÃO DO CANVAS DO ESPAÇO === */
+#space-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Fica atrás de tudo */
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+}
+
+/* Remova ou suavize o glow antigo para não brigar com as estrelas */
+.hero-bg-glow {
+    opacity: 0.1; /* Mais sutil */
+    background: linear-gradient(to right, var(--accent-secondary), var(--accent-color));
+}
+
 
 /* RESET E BASE */
 * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
@@ -416,3 +434,4 @@ footer { text-align: center; padding: 50px 0; border-top: 1px solid var(--glass-
         justify-content: center;
     }
 }
+
